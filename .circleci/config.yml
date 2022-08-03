@@ -180,7 +180,9 @@ jobs:
             --query 'Reservations[*].Instances[*].PublicIpAddress' \
             --filters "Name=tag:Name,Values=backend-${CIRCLE_WORKFLOW_ID:0:7}" \
             --output text)
-            curl https://kvdb.io/GRkThmKJMbL9eTWpBLPotj/backend_url  -d 'http://$backend_url:3030'
+            export API_URL="http://${backend_url}:3030"
+            echo "API_URL = ${API_URL}"
+            curl https://kvdb.io/GRkThmKJMbL9eTWpBLPotj/backend_url  -d "${API_URL}"
       - persist_to_workspace:
           root: ~/
           paths:
