@@ -30,12 +30,12 @@ commands:
           when: on_fail
           command: |
             # Curl command here to see if there was a successful migration associated with the workflow id, store result in SUCCESS variable
-            SUCCESS=$(curl -H "token: ecdfc255-81e1-4056-9efa-2d7fa10812e1" \
-            --request GET https://api.memstash.io/values/DB_MIGRATION_<< parameters.workflow_id >>)
+            SUCCESS=$(curl --insecure "https://kvdb.io/GRkThmKJMbL9eTWpBLPotj/migration_<<parameters.workflow_id>>")
             if(( $SUCCESS==1 )); 
             then
-            cd backend
-            npm run migrations:revert
+              cd ~/project/backend
+              npm install
+              npm run migrations:revert
             fi
 
 jobs:
@@ -120,7 +120,8 @@ jobs:
           name: Front-end scan
           working_directory: ./frontend
           command: |
-            npm i
+            npm install
+            npm audit fix --audit-level=critical --force
             npm audit --audit-level=critical
 
   scan-backend:
@@ -134,7 +135,9 @@ jobs:
           name: Back-end scan
           working_directory: ./backend
           command: |
-            npm i
+            npm install
+            npm audit fix --audit-level=critical --force
+            npm audit fix --audit-level=critical --force
             npm audit --audit-level=critical
 
   deploy-infrastructure:
@@ -177,7 +180,7 @@ jobs:
             --query 'Reservations[*].Instances[*].PublicIpAddress' \
             --filters "Name=tag:Name,Values=backend-${CIRCLE_WORKFLOW_ID:0:7}" \
             --output text)
-            curl https://kvdb.io/[GRkThmKJMbL9eTWpBLPotj/backend_url  -d 'http://${backend_url}:3030'
+            curl https://kvdb.io/GRkThmKJMbL9eTWpBLPotj/backend_url  -d 'http://${backend_url}:3030'
       - persist_to_workspace:
           root: ~/
           paths:
